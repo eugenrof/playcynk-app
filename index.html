@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayCynk - Test Parity Engine for Cypress ↔ Playwright Migration</title>
+  
+  <meta property="og:title" content="PlayCynk — Cypress ↔ Playwright Converter">
+  <meta property="og:description" content="A professional-grade test parity engine for migrating test suites between Cypress and Playwright.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/eugenrof/playcynk-app/refs/heads/main/images/social-share.jpeg">
+  <meta property="og:url" content="#">
+  <meta property="og:type" content="website">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PlayCynk — Cypress ↔ Playwright Converter">
+  <meta name="twitter:description" content="A professional-grade test parity engine for migrating test suites between Cypress and Playwright.">
+  <meta name="twitter:image" content="images/social-share.jpeg">
+
+  <link rel="icon" href="data:image/svg+xml,<svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><rect width='24' height='24' rx='7' fill='%237B5CF5'/><path d='M16 8L19 12M19 12L16 16M19 12H8M8 16L5 12M5 12L8 8M5 12H16' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header>
+    <div class="brand-container">
+      <div class="brand-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="7" fill="url(#brandGrad)"/>
+          <path d="M16 8L19 12M19 12L16 16M19 12H8M8 16L5 12M5 12L8 8M5 12H16" stroke="#0D0D10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="24" y2="24">
+              <stop offset="0%" stop-color="#00C271"/>
+              <stop offset="100%" stop-color="#7B5CF5"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="brand-name">PlayCynk</span>
+      </div>
+      <span class="brand-subtitle">Test Parity Engine for Cypress and Playwright</span>
+    </div>
+
+    <div class="header-center">
+      <div class="logo-chip cy" id="source-chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+          <path d="M14.5 9.5a3.5 3.5 0 1 0 0 5"/>
+        </svg>
+        <span id="source-label">Cypress</span>
+      </div>
+
+      <button class="swap-btn" id="swap-btn" onclick="swapDirection()" title="Swap direction">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 5.5H14M14 5.5L10.5 2M14 5.5L10.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 10.5H2M2 10.5L5.5 7M2 10.5L5.5 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="logo-chip pw" id="target-chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a4 4 0 0 0-4 4v12a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/>
+          <path d="M16 10h-8"/>
+          <path d="M12 2v16"/>
+        </svg>
+        <span id="target-label">Playwright</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="divider action-divider" style="width:1px;height:24px;background:var(--border);flex-shrink:0;margin:0 4px;"></div>
+      <button class="btn" onclick="clearAll()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Clear All
+      </button>
+      <button class="btn-primary" id="convert-btn" onclick="convert()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5l5.5 5.5 5.5-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="convert-label">Convert →</span>
+        <kbd>⌘↵</kbd>
+      </button>
+    </div>
+  </header>
+
+  <section class="pro-tips-section">
+    <details>
+      <summary><strong>ℹ️️ Pro Tips: Migration Best Practices ℹ️️</strong></summary>
+      <ul>
+        <li><strong>Audit Before Converting:</strong> Review Cypress custom commands and global hooks; these often lack direct equivalents and require manual implementation</li>
+        <li><strong>Prioritize Critical Paths:</strong> Run the converter on high-risk smoke tests first to validate output before migrating the full suite</li>
+        <li><strong>Review Assertions:</strong> Verify assertion logic closely, as Cypress and Playwright handle chainable expectations differently in specific edge cases</li>
+      </ul>
+    </details>
+  </section>
+
+  <div class="editor-area">
+    <div class="pane">
+      <div class="pane-header">
+        <div class="pane-label cy" id="left-label">
+          <div class="pane-dot"></div>
+          <span id="left-title">Cypress input</span>
+        </div>
+        <div class="pane-actions">
+          <button class="btn-sm" onclick="clearInput()">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 1.5l8 8M9.5 1.5l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Clear
+          </button>
+        </div>
+      </div>
+      <div class="examples-bar" id="examples-bar">
+        <span class="examples-label">Examples</span>
+        <button class="example-pill" onclick="loadExample('login')">🔐 Login</button>
+        <button class="example-pill" onclick="loadExample('dashboard')">📊 Dashboard</button>
+        <button class="example-pill" onclick="loadExample('form')">📝 Form</button>
+        <button class="example-pill" onclick="loadExample('navigation')">🧭 Navigation</button>
+        <button class="example-pill" onclick="loadExample('api')">⚡ API Request</button>
+      </div>
+      <div class="editor-wrap">
+        <div class="line-gutter" id="left-gutter"></div>
+        <textarea id="input-area" class="with-gutter" placeholder="Paste your test code here..." spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+      </div>
+      <div class="bottom-bar" style="border-top:0">
+        <div class="stats-row" id="left-stats" style="display:none">
+          <div class="stat-item"><span class="dot"></span><strong id="stat-lines">0</strong> lines</div>
+          <div class="stat-item"><span class="dot"></span><strong id="stat-cmds">0</strong> commands</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="middle-divider"></div>
+
+    <div class="pane output-pane">
+      <div class="pane-header">
+        <div class="pane-label pw" id="right-label">
+          <div class="pane-dot"></div>
+          <span id="right-title">Playwright output</span>
+        </div>
+        <div class="pane-actions">
+          <button class="btn-sm" onclick="copyOutput(this)" id="copy-btn">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="3.5" y="3.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 7.5V1.5H7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+      <div class="tab-strip" id="tab-strip">
+        <div class="tab active" onclick="switchTab('test', this)">Test spec</div>
+        <div class="tab" onclick="switchTab('pom', this)">Page object</div>
+      </div>
+      <div class="editor-wrap" id="output-wrap">
+        <div class="line-gutter" id="right-gutter"></div>
+        <div class="placeholder-state" id="output-placeholder">
+          <div class="placeholder-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M11 4v14M4 11h14" stroke="var(--text-dimmer)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Output will appear here</h3>
+          <p>Paste a test on the left and hit <strong>Convert</strong> - or load an example.</p>
+        </div>
+        <div class="output-code with-gutter" id="output-area" style="display:none"></div>
+      </div>
+      <div class="bottom-bar" id="right-bottom">
+        <div class="warnings-area" id="warnings-area" style="display:none"></div>
+        <div class="stats-row" id="right-stats" style="display:none">
+          <div class="stat-item"><span class="dot"></span><strong id="stat-out-lines">0</strong> lines</div>
+          <div class="stat-item"><span class="dot"></span><strong id="stat-converted">0</strong> converted</div>
+          <div class="stat-item"><span class="dot"></span><strong id="stat-todos">0</strong> TODOs</div>
+          <div class="stat-item"><span class="dot"></span><strong id="stat-ms">0</strong>ms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-left">
+      <span class="footer-copyright">&copy; 2026 Eugen Rof | <strong>QA Toolset</strong></span>
+    </div>
+    <div class="footer-right">
+      <a href="https://github.com/eugenrof/playcynk-app" target="_blank" rel="noopener noreferrer" class="footer-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.008.069-.008 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.193 22 16.44 22 12.017 22 6.484 17.522 2 12 2z"/>
+        </svg>
+        <strong>GitHub Source</strong>
+      </a>
+    </div>
+  </footer>
+</div>
+
+<script src="converter.js"></script>
+<script src="playwright-to-cypress.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
