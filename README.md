@@ -1,5 +1,7 @@
 ## PlayCynk — <span style="color: #00C271;">Cypress</span> ↔ <span style="color: #7B5CF5;">Playwright</span> Converter
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-00C271?style=for-the-badge&logo=vercel)](https://playcynk.vercel.app/)
+
 PlayCynk is a professional-grade migration tool engineered to solve the interoperability challenges between the two most popular E2E testing frameworks. Built to support the evolving needs of modern QA teams, it reduces the manual overhead required to move test suites between Cypress and Playwright.
 
 ## The Problem It Solves
