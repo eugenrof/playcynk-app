@@ -131,7 +131,7 @@ const CYPRESS_EXAMPLES = {
   it('should fetch user data', () => {
     cy.request('GET', '/api/users').then((response) => {
       expect(response.status).to.eq(200)
-      expect(response.body).to.have.length(10)
+      expect(response.body).have.length(10)
     })
   })
 
@@ -236,41 +236,24 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
   const t = line.trim();
   if (!t || t.startsWith('//')) return '  ' + t;
 
-  // cy.visit
   if (/cy\.visit\(/.test(t)) {
     const m = t.match(/cy\.visit\(['"`]([^'"`]+)['"`]/);
     return m ? `    await page.goto('${m[1]}');` : `    await page.goto('/');`;
   }
-
-  // cy.reload
   if (/cy\.reload\(\)/.test(t)) return `    await page.reload();`;
-
-  // cy.go
   if (/cy\.go\(['"`]back/.test(t)) return `    await page.goBack();`;
   if (/cy\.go\(['"`]forward/.test(t)) return `    await page.goForward();`;
-
-  // cy.clearCookies
   if (/cy\.clearCookies\(\)/.test(t)) return `    await page.context().clearCookies();`;
-
-  // cy.clearLocalStorage
   if (/cy\.clearLocalStorage\(\)/.test(t)) return `    await page.evaluate(() => localStorage.clear());`;
-
-  // cy.screenshot
   if (/cy\.screenshot\(/.test(t)) return `    await page.screenshot({ path: 'screenshots/screenshot.png' });`;
-
-  // cy.log
   if (/cy\.log\(/.test(t)) {
     const m = t.match(/cy\.log\(['"`]([^'"`]+)['"`]/);
     return m ? `    console.log('${m[1]}');` : `    console.log('log');`;
   }
-
-  // cy.viewport
   if (/cy\.viewport\(/.test(t)) {
     const m = t.match(/cy\.viewport\((\d+),\s*(\d+)\)/);
     return m ? `    await page.setViewportSize({ width: ${m[1]}, height: ${m[2]} });` : `    // TODO: cy.viewport()`;
   }
-
-  // cy.url
   if (/cy\.url\(\)/.test(t)) {
     const shouldM = t.match(/\.should\(['"`]([^'"`]+)['"`](?:,\s*['"`]([^'"`]*)['"`])?\)/);
     if (shouldM) {
@@ -280,17 +263,11 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     }
     return `    await expect(page).toHaveURL(/* expected URL */);`;
   }
-
-  // cy.title
   if (/cy\.title\(\)/.test(t)) return `    await expect(page).toHaveTitle(/* expected title */);`;
-
-  // cy.contains
   if (/cy\.contains\(/.test(t) && !/cy\.get/.test(t)) {
     const m = t.match(/cy\.contains\(['"`]([^'"`]+)['"`]/);
     return m ? `    await expect(page.getByText('${m[1]}')).toBeVisible();` : `    // cy.contains() — convert manually`;
   }
-
-  // cy.wait
   if (/cy\.wait\(/.test(t)) {
     const aliasM = t.match(/cy\.wait\(['"`]?@(\w+)['"`]?\)/);
     if (aliasM) return `    await ${aliasM[1]}Promise;`;
@@ -302,8 +279,6 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     }
     return `    // TODO: cy.wait() — convert manually`;
   }
-
-  // cy.intercept
   if (/cy\.intercept\(/.test(t)) {
     const m = t.match(/cy\.intercept\(['"`](GET|POST|PUT|DELETE|PATCH)['"`],\s*['"`]([^'"`]+)['"`]/i);
     const aliasM = t.match(/\.as\(['"`](\w+)['"`]\)/);
@@ -323,8 +298,6 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     warns.push(`cy.intercept() — partial conversion, review route mock`);
     return `    // TODO: cy.intercept() — convert manually\n    // ${t}`;
   }
-
-  // cy.request
   if (/cy\.request\(/.test(t)) {
     warns.push(`cy.request() — use Playwright's apiRequest context`);
     return [
@@ -333,15 +306,12 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
       `    // expect(response.ok()).toBeTruthy();`,
     ].join('\n');
   }
-
-  // cy.fixture
   if (/cy\.fixture\(/.test(t)) {
     const m = t.match(/cy\.fixture\(['"`]([^'"`]+)['"`]/);
     warns.push(`cy.fixture('${m ? m[1] : '...'}') — load as a JSON import instead`);
     return `    // const ${m ? toCamel(m[1]) : 'data'} = require('./fixtures/${m ? m[1] : 'data'}.json');`;
   }
 
-  // cy.get
   const getM = t.match(/cy\.get\(['"`]([^'"`]+)['"`]\)/);
   if (getM) {
     const sel = getM[1];
@@ -350,14 +320,12 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     selectors.set(sel, conv);
     const lines = [];
 
-    // alias
     const asM = t.match(/\.as\(['"`](\w+)['"`]\)/);
     if (asM) {
       aliasMap.set(asM[1], locator);
       lines.push(`    const ${asM[1]}Locator = ${locator};`);
     }
 
-    // chained actions
     if (/\.type\(/.test(t)) {
       const vm = t.match(/\.type\(['"`]([^'"`]*)['"`]\)/);
       lines.push(`    await ${locator}.fill('${vm ? vm[1] : ''}');`);
@@ -380,7 +348,6 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
       lines.push(`    await ${locator}.dispatchEvent('${vm ? vm[1] : 'click'}');`);
     }
 
-    // assertions
     const shouldM = t.match(/\.should\(['"`]([^'"`]+)['"`](?:,\s*['"`]([^'"`]*)['"`](?:,\s*['"`]([^'"`]*)['"`])?)?\)/);
     if (shouldM) {
       const [, ass, val, extra] = shouldM;
@@ -393,7 +360,6 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     return lines.join('\n');
   }
 
-  // alias reference
   const aliasRef = t.match(/cy\.get\(['"`]@(\w+)['"`]\)/);
   if (aliasRef) {
     const name = aliasRef[1];
@@ -407,15 +373,11 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     return lines.length ? lines.join('\n') : `    // @${name} alias action — convert manually`;
   }
 
-  // skip structural tokens
   if (/^[{}()];?$/.test(t) || t === '') return null;
-
-  // unhandled cy.* 
   if (/cy\./.test(t)) {
     warns.push(`Unhandled: ${t.slice(0, 60)}`);
     return `    // TODO: ${t}`;
   }
-
   return '  ' + t;
 }
 
@@ -451,7 +413,6 @@ function convertCypressToPlaywright(source, generatePOM) {
       depth = Math.max(0, depth - 1);
       out.push(`${ind(depth)}});`);
     } else if (t === '{' || t === '}' || t === '' || t === ')') {
-      // skip bare structural tokens
     } else {
       const converted = convertCypressLine(raw, warns, selectors, aliasMap);
       if (converted !== null) out.push(converted);
