@@ -330,6 +330,10 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
       const vm = t.match(/\.type\(['"`]([^'"`]*)['"`]\)/);
       lines.push(`    await ${locator}.fill('${vm ? vm[1] : ''}');`);
     }
+    if (/\.selectFile\(/.test(t)) {
+      const vm = t.match(/\.selectFile\(['"`]([^'"`]+)['"`]\)/);
+      lines.push(`    await ${locator}.setInputFiles('${vm ? vm[1] : ''}');`);
+    }
     if (/\.clear\(\)/.test(t)) lines.push(`    await ${locator}.clear();`);
     if (/\.click\(\)/.test(t)) lines.push(`    await ${locator}.click();`);
     if (/\.dblclick\(\)/.test(t)) lines.push(`    await ${locator}.dblclick();`);
@@ -352,8 +356,11 @@ function convertCypressLine(line, warns, selectors, aliasMap) {
     if (shouldM) {
       const [, ass, val, extra] = shouldM;
       lines.push(convertAssertion(locator, ass, val, extra));
-      const andM = t.match(/\.and\(['"`]([^'"`]+)['"`](?:,\s*['"`]([^'"`]*)['"`])?\)/);
-      if (andM) lines.push(convertAssertion(locator, andM[1], andM[2]));
+    }
+    
+    const andM = t.match(/\.and\(['"`]([^'"`]+)['"`](?:,\s*['"`]([^'"`]*)['"`])?\)/);
+    if (andM) {
+      lines.push(convertAssertion(locator, andM[1], andM[2]));
     }
 
     if (lines.length === 0) lines.push(`    const ${conv.name} = ${locator};`);
